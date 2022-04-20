@@ -1,0 +1,10 @@
+# python
+__pycache__/
+*.ipynb
+
+# folders
+content/
+output/
+
+# config files
+config.ini
