@@ -1,0 +1,32 @@
+/* ___________________________________________________________ */
+/*                          FLEX TABLE                         */
+/* ___________________________________________________________ */
+.flextable {
+    display: grid;
+    border: 1px solid var(--color-lines);
+}
+.flextable__header, .flextable__index {
+    display: block;
+    background: var(--color-theme);
+    color: white;
+}
+.flextable span {
+    display: none;
+    font-style: italic;
+}
+@media screen and (max-width: 600px) {
+    .flextable {
+        display: flex;
+        flex-direction: column;
+    }
+    .flextable div {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+    .flextable .flextable__header {
+        display: none;
+    }
+    .flextable span {
+        display: inline;
+    }
+}

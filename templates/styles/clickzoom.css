@@ -1,0 +1,19 @@
+/* ___________________________________________________________ */
+/*                           CLICKZOOM                         */
+/* ___________________________________________________________ */
+.clickzoom {
+    margin-left: var(--margin-sides, 1.5rem);
+    margin-right: var(--margin-sides, 1.5rem);
+}
+.clickzoom input[type=checkbox] {
+    display: none;
+}
+.clickzoom img {
+    transition: transform 0.25s ease;
+    cursor: zoom-in;
+    margin-top: 0;
+}
+.clickzoom input[type=checkbox]:checked~img {
+    transform: scale(1.5);
+    cursor: zoom-out;
+}

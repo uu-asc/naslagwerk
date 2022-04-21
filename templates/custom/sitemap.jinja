@@ -1,0 +1,52 @@
+<div class="toc">
+<ul>
+    {% for section, chapters in sitemap.items() %}
+    <li>
+        <h3>{{ section }}</h3>
+            <ul>
+            {% for chapter, groups in chapters.items() %}
+                {% if chapter is string() %}
+                <li>
+                    <h4>{{ chapter }}</h4>
+                    <ul>
+                    {% for group, pages in groups.items() %}
+                    {% if group is string() %}
+                        <li>
+                            <p>{{ group }}</p>
+                            <ul>
+                                {% for page, href in pages %}
+                                <li><a href="{{ href }}">{{ page }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% else %}
+                        {% for page, href in pages %}
+                        <li><a href="{{ href }}">{{ page }}</a></li>
+                        {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                {% for group, pages in groups.items() %}
+                    {% if group is string() %}
+                    <li>
+                        <p>{{ group }}</p>
+                        <ul>
+                            {% for page, href in pages %}
+                            <li><a href="{{ href }}">{{ page }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% else %}
+                    {% for page, href in pages %}
+                    <li><a href="{{ href }}">{{ page }}</a></li>
+                    {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
+            {% endfor %}
+            </ul>
+        {% endfor %}
+    </li>
+</ul>
+</div>

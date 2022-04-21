@@ -1,0 +1,74 @@
+{% extends "page/base.jinja" %}
+
+{% block stylesheets %}
+{{ super() }}
+<link rel="stylesheet" href="{{ nestedness }}css/main.css">
+{% endblock %}
+
+{% block content %}{{ content }}{% endblock %}
+
+{% block navigation %}
+{% set prev_page = topo.loc[prev_page_id] %}
+{% set next_page = topo.loc[next_page_id] %}
+{% macro make_button(content, page) -%}
+    <a href="{{ nestedness + page.href }}" title="{{ page.section }} | {{ page.page }}" class="header__button">{{ content }}</a>
+{%- endmacro %}
+<div class="header__buttons">
+    {{ make_button('&#9664;', prev_page) }}
+    {{ make_button('&#9654;', next_page) }}
+</div>
+{% endblock %}
+
+{% macro is_current(page, this_page, href) -%}
+    <li class="chapter__page">
+        <a {% if page==this_page %}class="chapter__current" {% endif %}href="{{ nestedness + href }}">{{ page }}</a>
+    </li>
+{%- endmacro %}
+
+{% macro render_chapter(groups) %}
+    <div class="chapter">
+        {% for group, pages in groups.items() %}
+        {% if group is string() %}<div class="chapter__group">{{ group }}</div>{% endif %}
+        <ul>
+            {% for page, href in pages %}{{ is_current(page, this_page, href) }}{% endfor %}
+        </ul>
+        {% endfor %}
+    </div>
+{%- endmacro %}
+
+{% block aside %}
+<aside>
+    <div class="aside__toggle collapsible"></div>
+    <div class="aside__panel">
+        <div class="aside__title">{{ section }}</div>
+        <ul class="chapters">
+        {% for chapter, groups in sitemap[this_section].items() %}
+        {% if chapter is string() %}
+            <details{%if chapter==this_chapter %} open{% endif %}>
+                <summary class="chapter__toggle">{{ chapter }}</summary>
+                {{ render_chapter(groups) }}
+            </details>
+        {% else %}
+            {{ render_chapter(groups) }}
+        {% endif %}
+        {% endfor %}
+    </div>
+</aside>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll('.collapsible').forEach(function (i) {
+        i.addEventListener('click', function() {
+            collapseElement(this)
+        });
+    })
+    function collapseElement(element) {
+        if (element.classList.contains('hide')) {
+            element.classList.remove('hide');
+        } else {
+            element.classList.add('hide');
+        }
+    };
+</script>
+{% endblock %}

@@ -1,0 +1,18 @@
+<table>
+    <thead>
+        <tr>
+            <th>Versie</th>
+            <th>Datum</th>
+            <th>Opmerking</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for version, data in changelog.items() %}
+        <tr>
+            <th>{{ version }}</th>
+            <td>{{ data.date }}</td>
+            <td>{{ data.comment }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

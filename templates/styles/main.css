@@ -1,0 +1,108 @@
+/* ___________________________________________________________ */
+/*                       SIDEBAR NAVIGATION                    */
+/* ___________________________________________________________ */
+aside {
+    grid-area: aside;
+    display: flex;
+    flex-direction: row-reverse;
+    overflow: hidden;
+}
+.aside__panel {
+    display: none;
+}
+.aside__title {
+    margin-bottom: .25em;
+    font-size: 1.25em;
+    font-variant: all-small-caps;
+    font-weight: 600;
+    color: var(--color-gray-dark);
+}
+@media screen and (min-width: 900px) {
+    .aside__panel {
+        display: block;
+        padding: 1em;
+        color: var(--color-lines-dark);
+        overflow: auto;
+    }
+    /* side button */
+    .aside__toggle {
+        display: block;
+        border-top: none;
+        border-bottom: none;
+        border-left: 1px solid var(--color-lines-dark);
+        border-right: 1px solid var(--color-lines-dark);
+        background: var(--color-theme-light);
+        width: 16px;
+        height: 100%;
+    }
+    .aside__toggle:hover,
+    .aside__toggle:focus {
+        background: var(--color-theme);
+    }
+    .aside__toggle::before {
+        content: ' ';
+        position: sticky;
+        display: inline-block;
+        top: 50%;
+        border-top: 12px solid transparent;
+        border-bottom: 12px solid transparent;
+        border-left: 12px solid var(--color-lines-dark);
+        transform: translateX(1px) rotate(180deg);
+
+    }
+    .aside__toggle.hide::before {
+        transform: translateX(1px) translateY(0px);
+    }
+}
+
+/* chapters */
+.chapters {
+    list-style-type: none;
+    margin: 0;
+    padding-inline: 1.25em;
+}
+.chapters * {
+    padding: 0.25em 0;
+}
+/* clickable chapter labels */
+.chapter__toggle {
+    padding: 0.25em;
+    margin-left: -1em;
+    font-size: 1.2em;
+    color: var(--color-gray-medium);
+    cursor: pointer;
+}
+.chapter__toggle:hover,
+.chapter__toggle:focus {
+    background: var(--color-theme-light);
+}
+.chapter * {
+    padding: 0.25em;
+}
+/* layout for pages */
+.chapter__group {
+    font-weight: bold;
+    margin-left: -0.5em;
+    color: var(--color-gray-dark);
+}
+.chapter__page {
+    padding-inline: 0.5em;
+    border-left: solid 2px var(--color-lines-dark);
+    list-style-type: none;
+}
+.chapter__page:hover,
+.chapter__page a:focus {
+    background: var(--color-theme-light) 2px;
+}
+.chapter__page a {
+    text-decoration: none;
+    width: 100%;
+    color: var(--color-gray-light);
+}
+.chapter__current {
+    font-weight: bold;
+}
+
+.hide + * {
+    display: none;
+}
