@@ -69,29 +69,31 @@ class Converter:
         path = path.strip('\n')
         return (PATHS.content / 'raw' / path).read_text(encoding='utf8')
 
-    def image(self, image, width='100%', alt=None):
+    def image(self, image, **kwargs):
         """
         Render image that zooms when clicked.
         """
+        if 'width' not in kwargs:
+            kwargs['width'] = "100%"
         image = image.strip('\n')
         template = self.environment.get_template('snippets/image.jinja')
         return template.render(
             image=image,
-            width=width,
-            alt=alt,
+            kwargs=kwargs,
             **self.context
         )
 
-    def clickzoom(self, image, width='100%', alt=None):
+    def clickzoom(self, image, **kwargs):
         """
         Render image that zooms when clicked.
         """
+        if 'width' not in kwargs:
+            kwargs['width'] = "100%"
         image = image.strip('\n')
         template = self.environment.get_template('snippets/clickzoom.jinja')
         return template.render(
             image=image,
-            width=width,
-            alt=alt,
+            kwargs=kwargs,
             **self.context
         )
 
