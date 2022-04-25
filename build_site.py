@@ -36,19 +36,54 @@ from filecmp import dircmp
 from datetime import date
 from multiprocessing.dummy import Pool
 
-from site_builder.config import PATHS
-from site_builder.site import Topography, make_environment
-from site_builder.page import Page
+from naslagwerk.config import PATHS
+from naslagwerk.site import Topography, make_environment
+from naslagwerk.page import Page
 
 print(f'[finished in {stopwatch.split():.2f}s]')
 
 # init
-print('init', flush=True, end=' ')
+print('init', flush=True)
 
 pool = Pool(6)
+
+print("- laad topografie")
+if not PATHS.topography.exists():
+    raise FileNotFoundError(
+        "Topografie niet gevonden.\n"
+        "1. Heeft de site al een topografie?\n"
+        "   ---> controleer path in config.ini\n"
+        "2. Ben je de site aan het initialiseren?\n"
+        "   ---> run build_site.py om topografie aan te maken\n"
+    )
 topo = Topography.read_excel(PATHS.topography)
+
+print("- laad properties")
+if not PATHS.properties.exists():
+    PATHS.properties.touch()
+    init = (
+        "[PROPERTIES]\n"
+        "title = PLACEHOLDER\n"
+        "version = v0.1\n"
+        "language = nl\n"
+        "tbd = Nog op te leveren\n"
+        "toc_title = Inhoudsopgave\n"
+    )
+    PATHS.properties.write_text(init, encoding='utf8')
 site = load_ini(PATHS.properties)
+
+print("- laad changelog")
+if not PATHS.changelog.exists():
+    PATHS.changelog.touch()
+    init = {
+        "v0.1": {
+            "date": date.today().strftime('%Y-%m-%d'),
+            "comment": "Eerste oplevering."
+        }
+    }
+    PATHS.changelog.write_text(json.dumps(init), encoding='utf8')
 chlog = json.loads(PATHS.changelog.read_text(encoding='utf8'))
+
 environment = make_environment(site, topo, chlog)
 
 print(f'[finished in {stopwatch.split():.2f}s]')
@@ -98,6 +133,7 @@ if not 'folders' in args.skip:
 
     def copy_files(task):
         key, src, dst = task
+        src.mkdir(exist_ok=True)
         dst.mkdir(exist_ok=True)
         cmp = dircmp(src, dst)
         files = [f for f in cmp.left_list if f not in cmp.same_files]
