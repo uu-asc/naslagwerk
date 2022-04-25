@@ -23,16 +23,17 @@ class Converter:
         template = self.environment.get_template(f'custom/{template}')
         return template.render(**self.context)
 
-    def container(self, text, custom_class, process=True):
+    def container(self, text, process=True, **kwargs):
         """
-        Wrap text in div container with css class ``custom_class``.
+        Wrap text in div container. Add ``kwargs`` to div.
         """
+        kwargs = {k.strip('_'):v for k,v in kwargs.items()}
         template = self.environment.get_template('snippets/container.jinja')
         if '\n' in text and process:
             text = markdown(text, extensions=EXTENSIONS)
         return template.render(
             content=text,
-            custom_class=custom_class,
+            kwargs=kwargs
         )
 
     def collapsible(self, text):
@@ -109,7 +110,7 @@ class Converter:
         ).set_index('key')['value'].apply(to_markdown)
         return template.render(content=content)
 
-    def table(self, text, arg=None):
+    def table(self, text, **kwargs):
         """
         Render basic table from csv.
         """
@@ -124,13 +125,13 @@ class Converter:
             html = df.to_html(
                 index=False,
                 na_rep='',
-                classes=arg,
                 escape=False
             )
         return self.container(
             html,
-            'table__container',
             process=False,
+            class_='table__container',
+            **kwargs
         )
 
     def flextable(self, text):
@@ -153,10 +154,13 @@ class Converter:
         def add_span(s):
             return s.apply(lambda i: f"<span>{s.name}</span>{i}")
 
-        df = csv_to_df(text).apply(add_span
-        ).pipe(on_index, class_='flextable__index'
-        ).pipe(on_index, class_='flextable__header', axis=1
-        ).applymap(div)
+        df = (
+            csv_to_df(text)
+            .apply(add_span)
+            .pipe(on_index, class_='flextable__index')
+            .pipe(on_index, class_='flextable__header', axis=1)
+            .applymap(div)
+        )
 
         make_body = lambda s: ''.join([i+v for i,v in s.iteritems()])
         body = df.agg(''.join, axis=1).agg(make_body)

@@ -91,7 +91,10 @@ class Page:
                 continue
             elif item[0] == '|':
                 func, body = item[1:].split('\n', 1)
-                func, args = func.split(':') if ':' in func else (func, '')
+                if ':' in func:
+                    func, args = func.split(':', maxsplit=1)
+                else:
+                    func, args = func, ''
                 func = func.strip().lower()
                 self.styles.add(func) if func in AVAILABLE_STYLES else None
                 item = (func, body, self.get_args(args))
