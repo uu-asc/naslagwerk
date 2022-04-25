@@ -13,7 +13,7 @@ from naslagwerk.config import PATHS
 
 
 def make_environment(site, topography, changelog=None):
-    loader = FileSystemLoader(searchpath=PATHS.templates)
+    loader = FileSystemLoader(searchpath=[PATHS.templates, PATHS.defaults])
     environment = Environment(
         loader=loader,
         trim_blocks=True,
@@ -27,7 +27,7 @@ def make_environment(site, topography, changelog=None):
         'sitemap': topography.sitemap,
         'changelog': changelog if changelog is not None else {},
         'watermark': """
-    <!-- This site was built with the site builder at https://github.com/lcvriend/responsive_static_site_builder licensed under the GNU General Public License v3.0. -->
+    <!-- This site was built with the site builder at https://github.com/uu-asc/naslagwerk licensed under the GNU General Public License v3.0. -->
     """
     }
     return environment
