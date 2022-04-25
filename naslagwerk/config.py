@@ -3,16 +3,29 @@ from pathlib import Path
 from types import SimpleNamespace
 
 
+WORKDIR = Path(__file__).parent.parent.absolute()
+
 getstring = lambda i: i.strip('"\n').replace('\n', ' ')
 getpath = lambda i: Path(getstring(i))
 
 
+def getabspath(path):
+    if isinstance(path, str):
+        path = getpath(path)
+    if not path.is_absolute():
+        path = (WORKDIR / path).absolute()
+    return path.resolve()
+
+
 def get_configparser():
-    converters = {'path': getpath, 'string': getstring}
+    converters = {
+        'path': getpath,
+        'abspath': getabspath,
+        'string': getstring,
+    }
     return configparser.ConfigParser(converters=converters)
 
 
-WORKDIR = Path(__file__).resolve().parent.parent
 configfile = WORKDIR / 'config.ini'
 config = get_configparser()
 if not configfile.exists():
@@ -33,10 +46,11 @@ if not configfile.exists():
 config.read(configfile, encoding='utf8')
 
 
-PATHS = {k:config['PATHS'].getpath(k) for k in config['PATHS']}
+PATHS = {k:config['PATHS'].getabspath(k) for k in config['PATHS']}
 topofile = config['FILENAMES'].getstring('topography')
 propfile = config['FILENAMES'].getstring('properties')
 chlogfile = config['FILENAMES'].getstring('changelog')
+PATHS['defaults'] = WORKDIR / 'templates'
 PATHS['topography'] = PATHS['content'] / topofile
 PATHS['properties'] = PATHS['content'] / propfile
 PATHS['changelog'] = PATHS['content'] / chlogfile
