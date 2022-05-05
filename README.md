@@ -2,6 +2,7 @@
 **Tool om naslagwerken te genereren en beheren**
 
 Deze *static site builder* is gemaakt voor/door de Centrale Studentenadministratie van de [Universiteit Utrecht](https://www.uu.nl/). De tool ondersteunt de documentatie van processen, procedures en werkinstructies door gestructureerde en eenvoudig raadpleegbare naslagwerken te genereren. De output is een *static* en *responsive* website die zowel online als offline beschikbaar gemaakt kan worden.
+
 ---
 
 ## Example website
