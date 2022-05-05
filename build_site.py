@@ -6,6 +6,14 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Build static site')
 parser.add_argument(
+    'naslagwerk',
+    help=("""
+locatie van naslagwerk directory;
+mag volledig pad zijn;
+indien alleen naam van naslagwerk is opgegeven,
+dan zoekt script in parent directory.
+"""))
+parser.add_argument(
     '-c', '--clean',
     help='set flag to empty output folder first',
     action='store_true',
@@ -22,9 +30,9 @@ parser.add_argument(
     help='skip pages and/or folders')
 args = parser.parse_args()
 
-header = """
+header = f"""
 ====================================================================
-|                            BUILD SITE                            |
+|{f"BUILD SITE :: {args.naslagwerk}":^{68-len(args.naslagwerk)+14}}|
 ====================================================================
 """
 print(header)
@@ -32,11 +40,12 @@ print('imports', flush=True, end=' ')
 
 import json
 import shutil
+from pathlib import Path
 from filecmp import dircmp
 from datetime import date
 from multiprocessing.dummy import Pool
 
-from naslagwerk.config import PATHS
+from naslagwerk.config import Config
 from naslagwerk.site import Topography, make_environment
 from naslagwerk.page import Page
 
@@ -47,30 +56,23 @@ print('init', flush=True)
 
 pool = Pool(6)
 
+print("- laad config")
+path = Path(args.naslagwerk)
+if len(path.parts) == 1:
+    path = '..' / path
+config = Config(path / 'config.ini')
+PATHS = config.PATHS
+
 print("- laad topografie")
 if not PATHS.topography.exists():
-    raise FileNotFoundError(
-        "Topografie niet gevonden.\n"
-        "1. Heeft de site al een topografie?\n"
-        "   ---> controleer path in config.ini\n"
-        "2. Ben je de site aan het initialiseren?\n"
-        "   ---> run build_site.py om topografie aan te maken\n"
-    )
+    raise FileNotFoundError("""
+  Topografie niet gevonden.
+  1. Heeft de site al een topografie?
+     ---> controleer path in config.ini
+  2. Ben je de site aan het initialiseren?
+     ---> run eerst build_topography.py om topografie aan te maken
+""")
 topo = Topography.read_excel(PATHS.topography)
-
-print("- laad properties")
-if not PATHS.properties.exists():
-    PATHS.properties.touch()
-    init = (
-        "[PROPERTIES]\n"
-        "title = PLACEHOLDER\n"
-        "version = v0.1\n"
-        "language = nl\n"
-        "tbd = Nog op te leveren\n"
-        "toc_title = Inhoudsopgave\n"
-    )
-    PATHS.properties.write_text(init, encoding='utf8')
-site = load_ini(PATHS.properties)
 
 print("- laad changelog")
 if not PATHS.changelog.exists():
@@ -84,13 +86,13 @@ if not PATHS.changelog.exists():
     PATHS.changelog.write_text(json.dumps(init), encoding='utf8')
 chlog = json.loads(PATHS.changelog.read_text(encoding='utf8'))
 
-environment = make_environment(site, topo, chlog)
+environment = make_environment(config, topo, chlog)
 
 print(f'[finished in {stopwatch.split():.2f}s]')
 info = f"""
    +------------------------------------------------------------+
-   | title:   {site['title']:<50}|
-   | version: {site['version']:<50}|
+   | title:   {config.PROPERTIES.title:<50}|
+   | version: {config.PROPERTIES.version:<50}|
    | pages:   {len(topo.data):<50}|
    +------------------------------------------------------------+
 """
@@ -101,18 +103,17 @@ if args.clean:
 
     shutil.rmtree(PATHS.output)
     stopwatch.split()
-    print(f'[finished in {stopwatch.split():.2f}s]')
+    print(f'[finished in {stopwatch.split():.2f}s]\n')
 
 if args.version:
     new_version = input("New version: ")
     comment = input("Comment for changelog: ")
     print()
 
-    site['version'] = new_version
     chlog[new_version] = {'date': str(date.today()), 'comment': comment}
-
     PATHS.changelog.write_text(json.dumps(chlog), encoding='utf8')
-    write_ini(PATHS.properties, site)
+    config.parser['PROPERTIES']['version'] = new_version
+    config.write_ini()
     stopwatch.split()
 
 # pages
@@ -121,11 +122,12 @@ if not 'pages' in args.skip:
 
     def write_page(md):
         print(f' «{md.name}»')
-        page = Page.read_md(md, site, topo, environment)
-        page.write(PATHS.output)
+        page = Page.read_md(md, config, topo, environment)
+        if page is not None:
+            page.write(PATHS.output)
 
     pool.map(write_page, PATHS.content.glob('**/*.md'))
-    print(f'[finished in {stopwatch.split():.2f}s]')
+    print(f'[finished in {stopwatch.split():.2f}s]\n')
 
 # copy
 if not 'folders' in args.skip:
@@ -142,12 +144,21 @@ if not 'folders' in args.skip:
             shutil.copyfile(src / file, dst / file)
 
     folders_to_copy = [
-        ('iframes', PATHS.content / 'iframes', PATHS.output / 'iframes'),
-        ('images', PATHS.content / 'images', PATHS.output / 'images'),
-        ('css', PATHS.templates / 'styles', PATHS.output / 'css'),
+        ('iframes',
+            PATHS.content / 'iframes',
+            PATHS.output / 'iframes'),
+        ('images',
+            PATHS.content / 'images',
+            PATHS.output / 'images'),
+        ('css-defaults',
+            PATHS.defaults / 'styles',
+            PATHS.output / 'css'),
+        ('css-custom',
+            PATHS.templates / 'styles',
+            PATHS.output / 'css'),
     ]
     pool.map(copy_files, folders_to_copy)
-    print(f'[finished in {stopwatch.split():.2f}s]')
+    print(f'[finished in {stopwatch.split():.2f}s]\n')
 
 print('-------------------------------------------------')
 print(    f'::TOTAL RUN TIME:: {stopwatch.total():.2f}s.')

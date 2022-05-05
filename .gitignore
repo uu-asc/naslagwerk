@@ -2,9 +2,10 @@
 __pycache__/
 *.ipynb
 
+# system
+*.db
+
 # folders
 content/
 output/
-
-# config files
-config.ini
+notebooks/

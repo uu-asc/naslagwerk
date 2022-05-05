@@ -5,14 +5,13 @@ from functools import cached_property, reduce
 from markdown import Markdown
 from markdown.extensions.toc import TocExtension
 
-from naslagwerk.config import AVAILABLE_STYLES
 from naslagwerk.convert import Converter
 
 
 class Page:
     def __init__(
         self,
-        site,
+        config,
         topography,
         environment,
         template='main',
@@ -21,12 +20,12 @@ class Page:
         ctime=None,
         mtime=None,
     ):
-        self.page_id = page_id
-        self.text = text
-        self.site = site
+        self.config = config
         self.topography = topography
         self.environment = environment
         self.template = template
+        self.page_id = page_id
+        self.text = text
         self.ctime = ctime
         self.mtime = mtime
         self.styles = set()
@@ -34,12 +33,12 @@ class Page:
     @property
     def content(self):
         toc = TocExtension(
-            title=self.site['toc_title'],
+            title=self.config.PROPERTIES.toc_title,
             anchorlink=True,
         )
         EXTENSIONS = ['nl2br', toc]
         markdown = Markdown(extensions=EXTENSIONS)
-        converter = Converter(self.environment, self.context)
+        converter = Converter(self.environment, self.context, self.config)
 
         def render(item):
             if isinstance(item, tuple):
@@ -50,7 +49,7 @@ class Page:
 
         sections = [render(item) for item in self.sections]
         if not sections:
-            return self.site['tbd']
+            return self.config.PROPERTIES.tbd
 
         html = markdown.convert('\n'.join(sections))
         return self.postprocess(html)
@@ -96,7 +95,8 @@ class Page:
                 else:
                     func, args = func, ''
                 func = func.strip().lower()
-                self.styles.add(func) if func in AVAILABLE_STYLES else None
+                if func in self.config.AVAILABLE_STYLES:
+                    self.styles.add(func)
                 item = (func, body, self.get_args(args))
             sections.append(item)
         return sections
@@ -128,13 +128,6 @@ class Page:
             return match.group(0)
         return regex.sub(make_crossref, item)
 
-    # def pp_crossrefs(self, item):
-    #     for code, href in self.topography.crossrefs.items():
-    #         url = self.context['nestedness'] + href
-    #         crossref =f'<a class="crossref" href="{url}">{code}</a>'
-    #         item = item.replace(f'[{code}]', crossref)
-    #     return item
-
     def pp_shortcuts(self, item):
         regex = re.compile("(ctrl|alt|shift)\s?(?:-|\+)\s?(\S)")
         def format_kbd(match):
@@ -146,7 +139,7 @@ class Page:
     def read_md(
         cls,
         path,
-        site,
+        config,
         topography,
         environment,
         encoding='utf-8'
@@ -160,8 +153,22 @@ class Page:
         mtime = datetime.fromtimestamp(mtimestamp).strftime('%d-%m-%Y')
         md = path.read_text(encoding=encoding)
         page_id, text = md.split('\n', 1)
+        if page_id not in topography.data.index:
+            print(
+f"""
++-----------------------------------------------------------------------------+
+                            !! WAARSCHUWING !!
++-----------------------------------------------------------------------------+
+   - file: "{path.relative_to(config.WORKDIR)}"
+   - id:   <{page_id}>
+
+   Id komt niet voor in topografie
+   -> bestand kan niet worden verwerkt
++-----------------------------------------------------------------------------+
+""")
+            return None
         return cls(
-            site,
+            config,
             topography,
             environment,
             page_id=page_id,

@@ -9,11 +9,10 @@ from jinja2 import Environment, FileSystemLoader
 from markdown import Markdown
 from markdown.extensions.toc import TocExtension
 
-from naslagwerk.config import PATHS
 
-
-def make_environment(site, topography, changelog=None):
-    loader = FileSystemLoader(searchpath=[PATHS.templates, PATHS.defaults])
+def make_environment(config, topography, changelog=None):
+    searchpath=[config.PATHS.templates, config.PATHS.defaults]
+    loader = FileSystemLoader(searchpath=searchpath)
     environment = Environment(
         loader=loader,
         trim_blocks=True,
@@ -21,7 +20,7 @@ def make_environment(site, topography, changelog=None):
         auto_reload=False,
     )
     environment.globals = {
-        'site': site,
+        'props': config.PROPERTIES,
         'topo': topography.data,
         'hrefs_sections': topography.hrefs_sections,
         'sitemap': topography.sitemap,
@@ -72,7 +71,7 @@ class Topography:
         first_row = data.index[0]
 
         # hrefs and nestedness
-        cols = ['section', 'chapter', 'page']
+        cols = ['section', 'chapter', 'group', 'page']
         data['href'] = data[cols].apply(convert_to_href, axis=1)
         data['nestedness'] = data.href.str.count('/').apply(lambda i: i * '../')
         data.loc[first_row, 'href'] = 'index.html'

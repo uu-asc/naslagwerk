@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ site.language }}" dir="ltr">
+<html lang="{{ props.language }}" dir="ltr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{{ nestedness }}css/{{ stylesheet }}.css">
     {% endfor %}
     {% endblock %}
-    <title>{{ this_page }} | {{ site.title}}</title>
+    <title>{{ this_page }} | {{ props.title}}</title>
 </head>
 <body>
     <header>
@@ -19,7 +19,7 @@
             <a href="https://nl.wikipedia.org/wiki/Pareidolie">
                 <img src="{{ nestedness }}images\logo.svg" alt="logo">
             </a>
-            <div class="header__title">{{ site.title }}</div>
+            <div class="header__title">{{ props.title }}</div>
             <input type="checkbox" id="nav__toggle" class="nav__toggle">
             <label for="nav__toggle" class="nav__toggle__button">☰</label>
             <div class="nav__menu">
@@ -60,7 +60,7 @@
                 <div class="footer__container__version">
                     <h3>Versie</h3>
                     <div><a href="{{ nestedness }}home/sitemap.html">Sitemap</a></div>
-                    <div>Versienummer: <a href="{{ nestedness }}home/changelog.html">{{ site.version }}</a></div>
+                    <div>Versienummer: <a href="{{ nestedness }}home/changelog.html">{{ props.version }}</a></div>
                     <div>Gemaakt met deze <a href="https://github.com/lcvriend/responsive_static_site_builder">tool</a></div>
                 </div>
             </div>

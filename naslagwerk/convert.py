@@ -4,16 +4,15 @@ from io import StringIO
 import pandas as pd
 from markdown import markdown
 
-from naslagwerk.config import PATHS
-
 
 EXTENSIONS = ['nl2br']
 
 
 class Converter:
-    def __init__(self, environment, context):
+    def __init__(self, environment, context, config):
         self.environment = environment
         self.context = context
+        self.config = config
 
     def template(self, template):
         """
@@ -65,9 +64,10 @@ class Converter:
         template = self.environment.get_template('snippets/iframe.jinja')
         return template.render(iframe=iframe, **self.context)
 
-    def raw_html(self, path):
-        path = path.strip('\n')
-        return (PATHS.content / 'raw' / path).read_text(encoding='utf8')
+    def raw_html(self, filename):
+        filename = filename.strip('\n')
+        path = self.config.PATHS.content / 'raw' / filename
+        return path.read_text(encoding='utf8')
 
     def image(self, image, **kwargs):
         """

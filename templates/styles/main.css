@@ -37,6 +37,7 @@ aside {
     }
     .aside__toggle:hover,
     .aside__toggle:focus {
+        cursor: pointer;
         background: var(--color-theme);
     }
     .aside__toggle::before {

@@ -1,59 +1,59 @@
-import configparser
+from configparser import ConfigParser
 from pathlib import Path
 from types import SimpleNamespace
+from functools import cached_property
 
 
-WORKDIR = Path(__file__).parent.parent.absolute()
+class Config:
+    MODULEDIR = Path(__file__).parent.parent.absolute().resolve()
+    DEFAULT = MODULEDIR / 'config.defaults.ini'
 
-getstring = lambda i: i.strip('"\n').replace('\n', ' ')
-getpath = lambda i: Path(getstring(i))
+    def __init__(self, path):
+        self.path = Path(path)
+        self.parser = ConfigParser(converters={
+            'path': self.getpath,
+            'abspath': self.getabspath,
+            'string': self.getstring,
+        })
+        self.parser.read([self.DEFAULT, path], encoding='utf8')
 
+    @property
+    def WORKDIR(self):
+        return self.path.parent.absolute().resolve()
 
-def getabspath(path):
-    if isinstance(path, str):
-        path = getpath(path)
-    if not path.is_absolute():
-        path = (WORKDIR / path).absolute()
-    return path.resolve()
+    @cached_property
+    def AVAILABLE_STYLES(self):
+        path = self.PATHS.defaults / 'styles'
+        return [f.stem for f in path.glob('*.css')]
 
+    @cached_property
+    def PATHS(self):
+        topofile = self.parser['FILENAMES'].getstring('topography')
+        chlogfile = self.parser['FILENAMES'].getstring('changelog')
+        paths = self.parser['PATHS']
+        PATHS = {k:paths.getabspath(k) for k in paths}
+        PATHS['defaults'] = self.MODULEDIR / 'templates'
+        PATHS['topography'] = self.WORKDIR / topofile
+        PATHS['changelog'] = self.WORKDIR / chlogfile
+        return SimpleNamespace(**PATHS)
 
-def get_configparser():
-    converters = {
-        'path': getpath,
-        'abspath': getabspath,
-        'string': getstring,
-    }
-    return configparser.ConfigParser(converters=converters)
+    @property
+    def PROPERTIES(self):
+        return SimpleNamespace(**self.parser['PROPERTIES'])
 
+    def getstring(self, i):
+        return i.strip('"\n').replace('\n', ' ')
 
-configfile = WORKDIR / 'config.ini'
-config = get_configparser()
-if not configfile.exists():
-    config.read_dict({
-        'PATHS': {
-            'content': WORKDIR / 'content',
-            'templates': WORKDIR / 'templates',
-            'output': WORKDIR / 'output',
-        },
-        'FILENAMES': {
-            'topography': 'topography.xlsx',
-            'properties': 'properties.ini',
-            'changelog':  'changelog.json',
-        }
-    })
-    with open(configfile, 'w') as f:
-        config.write(f)
-config.read(configfile, encoding='utf8')
+    def getpath(self, i):
+        return Path(self.getstring(i))
 
+    def getabspath(self, path):
+        if isinstance(path, str):
+            path = self.getpath(path)
+        if not path.is_absolute():
+            path = (self.WORKDIR / path).absolute()
+        return path.resolve()
 
-PATHS = {k:config['PATHS'].getabspath(k) for k in config['PATHS']}
-topofile = config['FILENAMES'].getstring('topography')
-propfile = config['FILENAMES'].getstring('properties')
-chlogfile = config['FILENAMES'].getstring('changelog')
-PATHS['defaults'] = WORKDIR / 'templates'
-PATHS['topography'] = PATHS['content'] / topofile
-PATHS['properties'] = PATHS['content'] / propfile
-PATHS['changelog'] = PATHS['content'] / chlogfile
-PATHS = SimpleNamespace(**PATHS)
-
-AVAILABLE_STYLES = [f.stem for f in (PATHS.templates / 'styles').glob('*.css')]
+    def write_ini(self):
+        with open(self.path, 'w', encoding='utf8') as configfile:
+            self.parser.write(configfile)
