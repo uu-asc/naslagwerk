@@ -31,9 +31,13 @@ parser.add_argument(
 args = parser.parse_args()
 
 header = f"""
-====================================================================
++==================================================================+
 |{f"BUILD SITE :: {args.naslagwerk}":^{68-len(args.naslagwerk)+14}}|
-====================================================================
++==================================================================+
+
+   clean output folder?  {args.clean}
+   create new version?   {args.version}
+   skip sections?        {args.skip}
 """
 print(header)
 print('imports', flush=True, end=' ')
@@ -139,7 +143,7 @@ if not 'folders' in args.skip:
         dst.mkdir(exist_ok=True)
         cmp = dircmp(src, dst)
         files = [f for f in cmp.left_list if f not in cmp.same_files]
-        print(f" «{key}»{'::': >{12-len(key)}} {len(files)} files")
+        print(f" «{key}»{'::': >{16-len(key)}} {len(files)} files")
         for file in files:
             shutil.copyfile(src / file, dst / file)
 
@@ -158,8 +162,11 @@ if not 'folders' in args.skip:
             PATHS.output / 'css'),
     ]
     pool.map(copy_files, folders_to_copy)
-    print(f'[finished in {stopwatch.split():.2f}s]\n')
+    print(f'[finished in {stopwatch.split():.2f}s]')
 
-print('-------------------------------------------------')
-print(    f'::TOTAL RUN TIME:: {stopwatch.total():.2f}s.')
-print('=================================================')
+total_time = f"::TOTAL RUN TIME:: {stopwatch.total():.2f}s"
+print(f"""
++==================================================================+
+|{total_time:^66}|
++==================================================================+
+""")
