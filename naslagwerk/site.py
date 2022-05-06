@@ -82,7 +82,6 @@ class Topography:
         data['prev_page_id'] = np.roll(data.index.values, 1)
 
         # breadcrumbs
-        cols = ['section', 'chapter', 'group', 'page']
         drop_crumbs = lambda s: s.dropna().str.cat(sep=' | ')
         data['breadcrumbs'] = data[cols].agg(drop_crumbs, axis=1)
         return cls(data)
