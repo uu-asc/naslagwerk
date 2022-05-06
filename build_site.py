@@ -30,9 +30,10 @@ parser.add_argument(
     help='skip pages and/or folders')
 args = parser.parse_args()
 
+title = f"BUILD SITE :: {args.naslagwerk}"
 header = f"""
 +==================================================================+
-|{f"BUILD SITE :: {args.naslagwerk}":^{68-len(args.naslagwerk)+14}}|
+|{title:^66}|
 +==================================================================+
 
    clean output folder?  {args.clean}
@@ -157,11 +158,14 @@ if not 'folders' in args.skip:
         ('css-defaults',
             PATHS.defaults / 'styles',
             PATHS.output / 'css'),
+    ]
+    custom_folders_to_copy = [
         ('css-custom',
             PATHS.templates / 'styles',
             PATHS.output / 'css'),
     ]
     pool.map(copy_files, folders_to_copy)
+    pool.map(copy_files, custom_folders_to_copy)
     print(f'[finished in {stopwatch.split():.2f}s]')
 
 total_time = f"::TOTAL RUN TIME:: {stopwatch.total():.2f}s"
