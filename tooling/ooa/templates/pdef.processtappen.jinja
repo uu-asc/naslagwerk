@@ -1,0 +1,66 @@
+<style>
+{% include 'pdef.processtappen.css' %}
+</style>
+{% macro slug(item) -%}{{ item|lower|replace(' ', '-') }}{%- endmacro %}
+<div>
+<input type="checkbox" name="ontvouwen" id="ontvouwen" checked><label for="ontvouwen">alles tonen</label>
+{% for row in data.itertuples() %}
+    {% if loop.previtem is undefined or loop.previtem.onderdeel != row.onderdeel %}
+        <h2 id="{{ slug(row.onderdeel) }}"><a class="toclink" href="#{{ slug(row.onderdeel) }}">{{ row.onderdeel }}</a></h2>
+    {% endif %}
+    {% if loop.previtem is undefined or loop.previtem.hoofdstuk != row.hoofdstuk %}
+        <details class="pdef" open>
+        <summary><code>{{ row.hoofdstuk }}</code> {{ row.rubriek_omschrijving }}</summary>
+    {% endif %}
+    {% if loop.previtem is undefined or loop.previtem.processtap != row.processtap %}
+        <div class="pdef__item">
+            <div class="pdef__item__processtap">
+                <div>{{ row.omschrijving }}</div>
+                <div><code>{{ row.processtap }}</code></div>
+                {% if row.is_afh == 'ja' %}<div><em>Afhankelijke vraag</em></div>{% endif %}
+            </div>
+            <div>
+                <b>Inhoud</b>
+                <div>{{ row.tekst_nl }}</div>
+            </div>
+            <div class="pdef__item__antw">
+            {% if row.type_vraag == 'V' %}
+                {% if not row.antw %}
+                <b>Type</b> <em>Open vraag</em>
+                {% else %}
+                <b>Type</b> <em>Meerkeuze</em>
+                <div>
+                    {% for code, antwoord in row.antw %}
+                    <div>
+                        <code>{{ code }}</code>
+                    </div>
+                    <div>
+                        {{ antwoord }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% else %}
+                <b>Type</b> <em>Toelichting</em>
+            {% endif %}
+            </div>
+        </div>
+    {% endif %}
+    {% if loop.nextitem is undefined or loop.nextitem.hoofdstuk != row.hoofdstuk %}</details>{% endif %}
+{% endfor %}
+</div>
+<script>
+    document.addEventListener(
+        "input",
+        e => {
+            if (e.target.matches("#ontvouwen")) {
+                let elems = document.querySelectorAll(".pdef")
+                if (e.target.checked) {
+                    elems.forEach( i => i.setAttribute("open", "") )
+                } else {
+                    elems.forEach( i => i.removeAttribute("open"))
+                }
+            }
+        }
+    )
+</script>

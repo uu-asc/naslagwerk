@@ -1,0 +1,55 @@
+:root {
+    --pdef-color-brand: hsl(215, 50%, 23%);
+    --pdef-color-surface-1: hsl(203, 39%, 44%);
+    --pdef-color-surface-2: #a8dadc;
+    --pdef-color-text-dark: hsl(0, 3%, 17%);
+}
+.pdef {
+    margin-bottom: 1rem;
+}
+.pdef * + * {
+    margin: 0;
+}
+.pdef > summary {
+    padding: 0.5em;
+    font-size: 1.2em;
+    background: var(--color-theme, var(--pdef-color-brand));
+    border-top-right-radius: 1em;
+    cursor: pointer;
+    color: white;
+}
+.pdef > summary:hover {
+    color: var(--color-gray-dark, hsl(0,0%,25%));
+    background: var(--color-surface-2, var(--pdef-color-surface-2));
+}
+.pdef__item {
+    display: grid;
+    grid-template-columns: 12em 2fr 1fr;
+    row-gap: 1px;
+    border-bottom: 1px solid var(--color-lines, gray);
+    background: var(--color-lines, gray);
+}
+@media (max-width: 600px) {
+    .pdef__item {
+        display: flex;
+        flex-direction: column;
+    }
+}
+.pdef__item > * {
+    margin-block: 0;
+    padding: .25rem;
+    background: white;
+}
+.pdef__item__processtap {
+    background: var(--color-theme-background, var(--pdef-color-surface-1));
+    font-weight: bold;
+}
+.pdef__item__processtap em {
+    font-style: italic;
+    font-weight: normal;
+}
+.pdef__item__antw > div {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .25rem .75rem;
+}
