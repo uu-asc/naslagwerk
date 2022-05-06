@@ -281,7 +281,7 @@ article {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    width: min(calc(100% - 3em), 800px);
+    width: min(calc(100% - 3rem), 800px);
     margin: auto;
     margin-bottom: var(--margin-sides);
 }
