@@ -1,4 +1,5 @@
 import pandas as pd
+from pandas.io.formats.style import Styler
 from jinja2 import Environment, FileSystemLoader
 
 import pdef.tabel as tbl
@@ -39,11 +40,11 @@ def processtappen(pdef):
     )
     data = (
         pd.merge(
-        antw,
-        vragen
-        .set_index(grouper)
+            antw,
+            vragen
+            .set_index(grouper)
             .fillna({'tekst_nl': '-'}),
-        left_index=True,
+            left_index=True,
             right_index=True)
         .reset_index()
         .astype({'onderdeel': cats})
@@ -53,5 +54,18 @@ def processtappen(pdef):
     return template.render(data=data)
 
 
-    template = ENV.get_template('pdef.processtappen.jinja')
+def autov(table):
+    styles = [
+        {'selector': '',
+        'props': 'font-size: .9em;'},
+        {'selector': 'tbody th:not(.level0)',
+        'props': 'background-color: transparent; color: black;'},
+        {'selector': 'tbody :not(.level0):hover',
+        'props': 'background-color: transparent;'},
+        {'selector': 'tbody th.level0',
+        'props': 'background-color: var(--color-theme-light);'},
+    ]
+
+    template = ENV.get_template('pdef.autov.jinja')
+    data = Styler(table, cell_ids=False).set_table_styles(styles).to_html()
     return template.render(data=data)
