@@ -1,0 +1,47 @@
+<div class="pdef__autov">
+    <label for="pdef__autov__search">Zoek in overgangen</label><input type="text" class="pdef__autov__search" name="pdef__autov__search">
+    {{ data }}
+</div>
+<script>
+    let table = document.querySelector(".pdef__autov tbody")
+    for (let row of table.rows) {
+        let isEdge = Array
+            .from(row.cells)
+            .map(i => i.matches(":where(.level0, .level1)"))
+            .some(i=>i)
+        if ( isEdge ) { row.style.borderTop = '2px solid black' }
+    }
+
+    document.addEventListener(
+        "keyup",
+        e => {
+            if (e.target.matches(".pdef__autov__search")) {
+                let regex = new RegExp(e.target.value, 'i')
+                let table = e.target.closest("div").querySelector("tbody")
+                let selectedRows = []
+                let repository = []
+                let found = null
+                for ( let row of table.rows ) {
+                    repository.push(row.rowIndex)
+                    for (cell of row.cells) {
+                        if ( cell.classList.contains("level0") ) {
+                            if ( found ) { selectedRows = selectedRows.concat(repository.slice(0, -1)) }
+                            found = false
+                            repository = [row.rowIndex]
+                        }
+                        if ( regex.test(cell.textContent) ) {
+                            found = true
+                        }
+                    }
+                }
+                for ( let row of table.rows ) {
+                    if ( selectedRows.includes(row.rowIndex) ) {
+                        row.style.display = ''
+                    } else {
+                        row.style.display = 'none'
+                    }
+                }
+            }
+        }
+    )
+</script>
