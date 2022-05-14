@@ -18,6 +18,7 @@ def load_pdef_datasets(proces):
         load_qr('processtappen')
         .rename(columns={'hs_volgnummer':'hs_nr', 'ps_volgnummer': 'ps_nr'})
         .astype({'actor': actor_cats})
+        .sort_values(['actor', 'hs_nr', 'ps_nr'])
     )
     ropl = (
         QueryResult
