@@ -124,6 +124,7 @@ def maak_autov(dataset):
         return data
 
     processed = SimpleNamespace(**{
+        'regel': dataset.regel.query("soort == 'T'"),
         'aanvraag': dataset.aanvraag.pipe(
             ontdubbel,
             to_merge = ['besluit_status']
@@ -143,6 +144,10 @@ def maak_autov(dataset):
             to_merge = ['antwoord'],
             categories = ['hoofdstuk', 'processtap']
         ),
+        'termijnbewaking': dataset.termijnbewaking.pipe(
+            ontdubbel,
+            to_merge = ['schaakkloktype']
+        )
     })
 
     volgnummers = dataset.overgang.set_index('code').volgnummer
@@ -154,32 +159,39 @@ def maak_autov(dataset):
         for k,df in vars(processed).items()
     }
 
-    mapping_niveau = {'A': 'proces', 'R': 'rubriek', 'P': ''}
-    mapping_soort = {'S': 'status', 'A': 'antwoord'}
+    mapping_niveau = {
+        'A': 'proces',
+        'R': 'rubriek',
+        'P': '',
+        'V': 'termb.',
+    }
+    mapping_soort = {
+        'S': 'status',
+        'A': 'antwoord',
+        'T': ' toev.',
+        'E': ' eind'
+    }
     return (
         pd.concat(to_join.values())
         .rename(columns={
             'volgnummer': '#',
             'operator_1': 'op.',
             'besluit_status': 'proces',
-            'hoofdstuk': 'rubriek'})
-        .set_index(['#', 'code', 'type'])
-        .sort_index(ascending=[True, True, False, True])
-        .drop(columns=['iaor_id', 'operator_2'])
+            'hoofdstuk': 'rubriek',
+            'schaakkloktype': 'term.bew.'})
+        .assign(
+            niveau = lambda df: df.niveau.replace(mapping_niveau),
+            soort = lambda df: df.niveau + df.soort.replace(mapping_soort))
+        .set_index(['#', 'code', 'type', 'soort'])
         [[
-            'niveau',
-            'soort',
             'op.',
             'proces',
             'rubriek',
             'processtap',
             'status',
             'antwoord',
+            'term.bew.',
         ]]
-        .assign(
-            niveau = lambda df: df.niveau.replace(mapping_niveau),
-            soort = lambda df: df.niveau + df.soort.replace(mapping_soort))
-        .drop(columns = ['niveau'])
-        .set_index('soort', append=True)
+        .sort_index(ascending=[True, True, False, True])
         .astype('string')
     )
