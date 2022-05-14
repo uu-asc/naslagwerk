@@ -17,7 +17,7 @@ def processtappen(pdef):
         tbl.maak_ps(pdef)
         .merge(rubrieken, how='left')
         .assign(
-            onderdeel = lambda df: df.actor.replace(to_replace).astype(cats),
+            onderdeel = lambda df: df.actor.replace(to_replace),
             is_afh = lambda df: df.is_afh.replace({True: 'ja', False: 'nee'}))
     )
 
@@ -37,23 +37,21 @@ def processtappen(pdef):
         .apply(listify)
         .rename('antw')
     )
-
-    cols = [
-        'rubriek_omschrijving',
-        'omschrijving',
-        'is_afh',
-        'tekst_nl',
-        'type_vraag',
-    ]
-    data = pd.merge(
+    data = (
+        pd.merge(
         antw,
         vragen
         .set_index(grouper)
-        .fillna({'tekst_nl': '-'})
-        [cols],
+            .fillna({'tekst_nl': '-'}),
         left_index=True,
-        right_index=True
-    ).reset_index()
+            right_index=True)
+        .reset_index()
+        .astype({'onderdeel': cats})
+        .sort_values(['onderdeel', 'hs_nr', 'ps_nr'])
+    )
+    template = ENV.get_template('pdef.processtappen.jinja')
+    return template.render(data=data)
+
 
     template = ENV.get_template('pdef.processtappen.jinja')
     return template.render(data=data)
