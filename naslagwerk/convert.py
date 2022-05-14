@@ -5,7 +5,17 @@ import pandas as pd
 from markdown import markdown
 
 
-EXTENSIONS = ['nl2br']
+EXTENSIONS = [
+    'abbr',
+    'attr_list',
+    'def_list',
+    'fenced_code',
+    'footnotes',
+    'nl2br',
+    'sane_lists',
+    'smarty',
+    'tables',
+]
 
 
 class Converter:

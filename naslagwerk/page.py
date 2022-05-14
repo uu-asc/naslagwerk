@@ -5,7 +5,7 @@ from functools import cached_property, reduce
 from markdown import Markdown
 from markdown.extensions.toc import TocExtension
 
-from naslagwerk.convert import Converter
+from naslagwerk.convert import Converter, EXTENSIONS
 
 
 class Page:
@@ -36,8 +36,8 @@ class Page:
             title=self.config.PROPERTIES.toc_title,
             anchorlink=True,
         )
-        EXTENSIONS = ['nl2br', toc]
-        markdown = Markdown(extensions=EXTENSIONS)
+        extensions = EXTENSIONS + [toc]
+        markdown = Markdown(extensions=extensions)
         converter = Converter(self.environment, self.context, self.config)
 
         def render(item):
