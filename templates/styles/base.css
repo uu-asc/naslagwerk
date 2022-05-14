@@ -66,6 +66,9 @@ a {
     text-decoration: underline;
     color: var(--color-gray-dark);
 }
+summary:hover {
+    cursor: pointer;
+}
 
 /* table */
 .table__container {
