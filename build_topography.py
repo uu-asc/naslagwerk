@@ -61,7 +61,7 @@ import pandas as pd
 
 from naslagwerk.config import Config
 
-print(f'[finished in {stopwatch.split():.2f}s]')
+stopwatch.split()
 
 
 def load_topography(path):
@@ -187,13 +187,13 @@ if __name__ == '__main__':
     for key, path in vars(PATHS).items():
         print(f" > {key:.<12}{path}")
 
-    print(f'[finished in {stopwatch.split():.2f}s]\n')
+    stopwatch.split()
 
     # loading topography
     print('load topofile', flush=True, end=' ')
     df = load_topography(PATHS.topography)
     check_df(df)
-    print(f'[finished in {stopwatch.split():.2f}s]')
+    stopwatch.split()
 
     # creating page ids
     print('creating page_ids', flush=True, end=' ')
@@ -201,7 +201,7 @@ if __name__ == '__main__':
     fill_empty_ids = lambda i: generate_id() if pd.isna(i) else i
     df['page_id'] = df.page_id.apply(fill_empty_ids)
     df = df.set_index('page_id').fillna(value='')
-    print(f'[finished in {stopwatch.split():.2f}s]')
+    stopwatch.split()
 
     # finding page ids
     print('finding page_ids', flush=True, end=' ')
@@ -210,34 +210,31 @@ if __name__ == '__main__':
     results = pool.map(find_id, files)
     found = [(path, pid) for path, pid, found in results if found]
     not_found = [(path, pid) for path, pid, found in results if not found]
-    print(f'[finished in {stopwatch.split():.2f}s]\n')
+    stopwatch.split()
 
     # renaming updated files
     if found:
         print('renaming updated files', flush=True)
         pool.starmap(rename_file, found)
-        print(f'[finished in {stopwatch.split():.2f}s]\n')
+        stopwatch.split()
 
     # deleting unknown files
     if not_found:
         print('deleting unknown files', flush=True)
         for path, page_id in not_found:
             prompt_delete(path, page_id)
-        print(f'[finished in {stopwatch.split():.2f}s]\n')
+        stopwatch.split()
 
     # create files for new page ids
     print('creating files', flush=True)
     new_ids = set(df.index.values) - set(pid for _, pid in found)
     pool.map(make_file, new_ids)
-    print(f'[finished in {stopwatch.split():.2f}s]\n')
+    stopwatch.split()
 
     # save topography file
     print('save topography', flush=True, end=' ')
     writer = pd.ExcelWriter(PATHS.topography)
     df.to_excel(writer, 'site_topography')
     writer.save()
-    print(f'[finished in {stopwatch.split():.2f}s]\n')
-
-    print('-------------------------------------------------')
-    print(    f'::TOTAL RUN TIME:: {stopwatch.total():.2f}s.')
-    print('=================================================')
+    stopwatch.split()
+    stopwatch.total()

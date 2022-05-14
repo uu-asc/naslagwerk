@@ -54,7 +54,7 @@ from naslagwerk.config import Config
 from naslagwerk.site import Topography, make_environment
 from naslagwerk.page import Page
 
-print(f'[finished in {stopwatch.split():.2f}s]')
+stopwatch.split()
 
 # init
 print('init', flush=True)
@@ -91,9 +91,7 @@ if not PATHS.changelog.exists():
     PATHS.changelog.write_text(json.dumps(init), encoding='utf8')
 chlog = json.loads(PATHS.changelog.read_text(encoding='utf8'))
 
-environment = make_environment(config, topo, chlog)
-
-print(f'[finished in {stopwatch.split():.2f}s]')
+stopwatch.split()
 info = f"""
    +------------------------------------------------------------+
    | title:   {config.PROPERTIES.title:<50}|
@@ -108,7 +106,7 @@ if args.clean:
 
     shutil.rmtree(PATHS.output)
     stopwatch.split()
-    print(f'[finished in {stopwatch.split():.2f}s]\n')
+    stopwatch.split()
 
 if args.version:
     new_version = input("New version: ")
@@ -121,6 +119,8 @@ if args.version:
     config.write_ini()
     stopwatch.split()
 
+environment = make_environment(config, topo, chlog)
+
 # pages
 if not 'pages' in args.skip:
     print('pages')
@@ -132,7 +132,7 @@ if not 'pages' in args.skip:
             page.write(PATHS.output)
 
     pool.map(write_page, PATHS.content.glob('**/*.md'))
-    print(f'[finished in {stopwatch.split():.2f}s]\n')
+    stopwatch.split()
 
 # copy
 if not 'folders' in args.skip:
@@ -140,8 +140,8 @@ if not 'folders' in args.skip:
 
     def copy_files(task):
         key, src, dst = task
-        src.mkdir(exist_ok=True)
-        dst.mkdir(exist_ok=True)
+        src.mkdir(exist_ok=True, parents=True)
+        dst.mkdir(exist_ok=True, parents=True)
         cmp = dircmp(src, dst)
         files = [f for f in cmp.left_list if f not in cmp.same_files]
         print(f" «{key}»{'::': >{16-len(key)}} {len(files)} files")
@@ -166,11 +166,6 @@ if not 'folders' in args.skip:
     ]
     pool.map(copy_files, folders_to_copy)
     pool.map(copy_files, custom_folders_to_copy)
-    print(f'[finished in {stopwatch.split():.2f}s]')
+    stopwatch.split()
 
-total_time = f"::TOTAL RUN TIME:: {stopwatch.total():.2f}s"
-print(f"""
-+==================================================================+
-|{total_time:^66}|
-+==================================================================+
-""")
+stopwatch.total()

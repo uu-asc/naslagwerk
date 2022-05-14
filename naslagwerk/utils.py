@@ -1,35 +1,57 @@
 from time import perf_counter
+from string import Template
 from configparser import ConfigParser
 
 
 class Stopwatch:
-    def __init__(self):
-        self.storage = []
-        self()
+    SPLIT = "[finished in ${time}]"
+    TOTAL = """
++------------------------------------------------------------------+
+    :: TOTAL RUN TIME :: ${time}
++==================================================================+
+"""
 
-    def __call__(self):
+    def __init__(self, will_print=True):
+        self.will_print = will_print
+        self.times = []
+        self.click()
+
+    def click(self):
         now = perf_counter()
-        self.storage.append(now)
+        self.times.append(now)
 
     def split(self):
-        self()
-        return self.storage[-1] - self.storage[-2]
+        self.click()
+        time = self.times[-1] - self.times[-2]
+        if self.will_print:
+            print(Template(self.SPLIT).substitute(time=self.format_time(time)))
+        return time
 
     def total(self):
-        self()
-        return self.storage[-1] - self.storage[0]
+        self.click()
+        time = self.times[-1] - self.times[0]
+        if self.will_print:
+            print(Template(self.TOTAL).substitute(time=self.format_time(time)))
+        return time
+
+    def display(self, ):
+        print(f'[finished in {self.split():.2f}s]')
+
+    @staticmethod
+    def format_time(time):
+        return f"{time:.2f}s"
 
     @property
     def start(self):
-        return self.storage[0]
+        return self.times[0]
 
     @property
-    def times(self):
-        return [t - self.start for t in self.storage]
+    def durations(self):
+        return [t - self.start for t in self.times]
 
     @property
     def splits(self):
-        return [t2 - t1 for t1, t2 in zip(self.storage, self.storage[1:])]
+        return [t2 - t1 for t1, t2 in zip(self.times, self.times[1:])]
 
 
 def load_ini(path):
