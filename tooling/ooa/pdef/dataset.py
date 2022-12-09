@@ -4,8 +4,8 @@ from query import QueryResult
 
 
 def load_pdef_datasets(proces):
-    proces = proces.lower()
-    load_qr = lambda t: QueryResult.read_pickle(f"ref_ooa/{t}_{proces}").frame
+    # proces = proces.lower()
+    load_qr = lambda t: QueryResult.read_feather(f"ref_ooa/{t}_{proces}").frame
 
     afh   = load_qr('processtap_afh')
     antw  = load_qr('processtap_antwoorden')
