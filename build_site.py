@@ -146,7 +146,10 @@ if not 'folders' in args.skip:
         files = [f for f in cmp.left_list if f not in cmp.same_files]
         print(f" «{key}»{'::': >{16-len(key)}} {len(files)} files")
         for file in files:
-            shutil.copyfile(src / file, dst / file)
+            try:
+                shutil.copyfile(src / file, dst / file)
+            except PermissionError:
+                print(f'geen toestemming om "{file}" te kopiëren')
 
     folders_to_copy = [
         ('iframes',
