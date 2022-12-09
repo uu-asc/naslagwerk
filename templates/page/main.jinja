@@ -19,9 +19,9 @@
 </div>
 {% endblock %}
 
-{% macro is_current(page, this_page, href) -%}
+{% macro is_current(page, group, href) -%}
     <li class="chapter__page">
-        <a {% if page==this_page %}class="chapter__current" {% endif %}href="{{ nestedness + href }}">{{ page }}</a>
+        <a {% if page==this_page and group==this_group %}class="chapter__current" {% endif %}href="{{ nestedness + href }}">{{ page }}</a>
     </li>
 {%- endmacro %}
 
@@ -30,7 +30,7 @@
         {% for group, pages in groups.items() %}
         {% if group is string() %}<div class="chapter__group">{{ group }}</div>{% endif %}
         <ul>
-            {% for page, href in pages %}{{ is_current(page, this_page, href) }}{% endfor %}
+            {% for page, href in pages %}{{ is_current(page, group, href) }}{% endfor %}
         </ul>
         {% endfor %}
     </div>
