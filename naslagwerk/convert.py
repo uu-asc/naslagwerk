@@ -59,7 +59,7 @@ class Converter:
                 label, hide = label.split(':')
             hide = False if hide not in ['hide'] else True
             collapsible = template.render(
-                content=markdown(content, extensions=['nl2br']),
+                content=markdown(content, extensions=EXTENSIONS),
                 label=label,
                 hide=hide,
             )
@@ -115,6 +115,7 @@ class Converter:
         buffer = StringIO(text)
         content = pd.read_csv(
             buffer,
+            # engine='python',
             skipinitialspace=True,
             quotechar="'",
             header=None,
