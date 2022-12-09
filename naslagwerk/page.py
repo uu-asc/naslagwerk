@@ -1,4 +1,5 @@
 import re
+import warnings
 from datetime import datetime
 from functools import cached_property, reduce
 
@@ -44,7 +45,14 @@ class Page:
             if isinstance(item, tuple):
                 func, text, (args, kwargs) = item
                 method = getattr(converter, func)
-                item = method(text, *args, **kwargs)
+                try:
+                    item = method(text, *args, **kwargs)
+                except Exception as e:
+                    from textwrap import indent
+                    raise Exception(
+                        f"Fout gevonden in pagina met page_id: {self.page_id}\n"
+                        f"Zie volgende passage:\n{indent(text, prefix='> ')}"
+                    ) from e
             return item
 
         sections = [render(item) for item in self.sections]
@@ -61,6 +69,7 @@ class Page:
             to_rename = {
                 'section': 'this_section',
                 'chapter': 'this_chapter',
+                'group': 'this_group',
                 'page': 'this_page',
             }
             page_data = self.topography.data.loc[self.page_id].rename(to_rename)
@@ -117,6 +126,17 @@ class Page:
         pipeline = compose(methods)
         return pipeline(item)
 
+    def pp_arrows(self, item):
+        arrows = {
+            '-&gt;': '&rarr;',
+            '&lt;-': '&larr;',
+            '=&gt;': '&rArr;',
+            '&lt;=': '&lArr;',
+        }
+        for arrow, sub in arrows.items():
+            item = item.replace(arrow, sub)
+        return item
+
     def pp_crossrefs(self, item):
         regex = re.compile("\[([^#\[\]]+?)(#.+?)?\]")
         def make_crossref(match):
@@ -125,11 +145,14 @@ class Page:
                 href = self.topography.crossrefs[code]
                 url = f"{self.context['nestedness']}{href}{anchor or ''}"
                 return f'<a class="crossref" href="{url}">{code}</a>'
+            warnings.warn(
+                f"page_id '{self.page_id}' crossref {match.group(0)} "
+                "komt niet voor in topo", stacklevel=5)
             return match.group(0)
         return regex.sub(make_crossref, item)
 
     def pp_shortcuts(self, item):
-        regex = re.compile("(ctrl|alt|shift)\s?(?:-|\+)\s?(\S)")
+        regex = re.compile("(ctrl|alt|shift|&#8862; Win)\s?(?:-|\+)\s?(\S)")
         def format_kbd(match):
             kbd = lambda i: f"<kbd>{i}</kbd>"
             return ' + '.join(kbd(i) for i in match.groups())
