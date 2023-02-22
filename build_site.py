@@ -65,7 +65,10 @@ print("- laad config")
 path = Path(args.naslagwerk)
 if len(path.parts) == 1:
     path = '..' / path
-config = Config(path / 'config.ini')
+configfile = path / 'config.ini'
+config = Config(configfile)
+if not configfile.exists():
+    config.write_ini()
 PATHS = config.PATHS
 
 print("- laad topografie")
