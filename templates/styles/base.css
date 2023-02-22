@@ -328,6 +328,7 @@ article {
     width: min(calc(100% - 3rem), 800px);
     margin: auto;
     margin-bottom: var(--margin-sides);
+    line-height: 1.5em;
 }
 
 article *+* {
@@ -339,9 +340,9 @@ article :where(h2, h3, h4, h5, h6)+* {
 }
 
 article hr {
-    margin-top: 5rem;
+    margin-block: 1rem;
     border: 0;
-    border-top: 7px solid var(--color-lines)
+    border-top: 3px solid var(--color-lines)
 }
 
 article img {
