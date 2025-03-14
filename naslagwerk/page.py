@@ -29,7 +29,7 @@ class Page:
         self.text = text
         self.ctime = ctime
         self.mtime = mtime
-        self.styles = set()
+        self.styles = []
 
     @property
     def content(self):
@@ -77,7 +77,7 @@ class Page:
             **page_data,
             'ctime': self.ctime,
             'mtime': self.mtime,
-            'styles': self.styles,
+            'styles': list(dict.fromkeys(self.styles)),
         }
 
     def render(self):
@@ -98,15 +98,15 @@ class Page:
             if len(item) == 0:
                 continue
             elif item[0] == '|':
-                func, body = item[1:].split('\n', 1)
-                if ':' in func:
-                    func, args = func.split(':', maxsplit=1)
+                func_name, body = item[1:].split('\n', 1)
+                if ':' in func_name:
+                    func_name, args = func_name.split(':', maxsplit=1)
                 else:
-                    func, args = func, ''
-                func = func.strip().lower()
-                if func in self.config.AVAILABLE_STYLES:
-                    self.styles.add(func)
-                item = (func, body, self.get_args(args))
+                    func_name, args = func_name, ''
+                func_name = func_name.strip().lower()
+                if func_name in self.config.AVAILABLE_STYLES:
+                    self.styles.append(func_name)
+                item = (func_name, body, self.get_args(args))
             sections.append(item)
         return sections
 
