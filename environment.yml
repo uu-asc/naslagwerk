@@ -1,0 +1,20 @@
+name: naslagwerk
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - pandas
+  - altair
+  - jinja2
+  - markdown
+  - pyarrow
+  - beautifulsoup4
+  - lxml
+  - xlsxwriter
+  - openpyxl
+  - xlrd
+  - ipython
+  - ipykernel
+  - jupyter
+  - jupyterlab
